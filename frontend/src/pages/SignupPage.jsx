@@ -4,72 +4,52 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 
 export default function Signup() {
-  const { signup, setUser } = useAuth();
+  const { signup } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Password validator
-  const validatePassword = (password) => {
-    const regex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    return regex.test(password);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    // ✅ Username validation
-    if (username.trim().length < 3) {
-      toast.error("Username must be at least 3 characters long");
+    // ✅ basic client-side validation
+    if (username.trim().length < 6) {
+      toast.error("Username must be at least 6 characters long");
       setLoading(false);
       return;
     }
-
-    // ✅ Email validation
     if (!/\S+@\S+\.\S+/.test(email)) {
       toast.error("Please enter a valid email");
       setLoading(false);
       return;
     }
+    if (password.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      setLoading(false);
+      return;
+    }
 
-    // ✅ Password validation
-    if (!validatePassword(password)) {
+    // ✅ new password rule: at least one uppercase & one special character
+    if (!/(?=.*[A-Z])(?=.*[!@#$%^&*()_+[\]{};':"\\|,.<>/?]).*/.test(password)) {
       toast.error(
-        "Password must be at least 8 characters long, include one uppercase letter and one special character."
+        "Password must include at least one uppercase letter and one special character"
       );
       setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch("http://localhost:5000/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          username: username,
-          email: email,
-          password,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(
-          data.error || "Signup failed. Try again with different details."
-        );
-      }
-
-      setUser(data.user);
+      await signup(username.trim(), email.trim(), password);
       toast.success("Account created successfully!");
       navigate("/tasks");
     } catch (err) {
-      console.error(err);
-      toast.error(err.message);
+      console.error("Login error", err);
+      toast.error(
+        err?.message || "Signup failed. Try again with different details."
+      );
     } finally {
       setLoading(false);
     }
@@ -91,6 +71,7 @@ export default function Signup() {
             Username
           </label>
           <input
+            autoFocus
             id="username"
             type="text"
             className="w-full p-3 rounded-lg bg-neutral-700 text-white focus:outline-none"
@@ -131,9 +112,6 @@ export default function Signup() {
             placeholder="Create a password"
             required
           />
-          <p className="text-xs text-gray-400 mt-1">
-            Must be at least 8 characters, 1 uppercase & 1 special character.
-          </p>
         </div>
 
         {/* Submit Button */}

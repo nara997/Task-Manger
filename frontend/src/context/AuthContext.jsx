@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import { API_URL } from "../config";
 import { toast } from "react-hot-toast";
 
 const AuthContext = createContext();
@@ -7,23 +8,26 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in on app load
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("http://localhost:5000/auth/me", {
+        const res = await fetch(`${API_URL}/auth/me`, {
           method: "GET",
           credentials: "include",
         });
 
+        const data = await res.json(); // parse JSON for both success & error
+
         if (res.ok) {
-          const data = await res.json();
           setUser(data.user);
         } else {
+          console.error("Auth error:", data.error || res.statusText);
+          toast.error(data.error || "Failed to verify authentication");
           setUser(null);
         }
       } catch (err) {
-        console.error("Auth check failed:", err);
+        console.error("Network or JS error:", err);
+        toast.error(`Failed to verify authentication: ${err?.message}`);
         setUser(null);
       } finally {
         setLoading(false);
@@ -33,76 +37,54 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // Signup
+  // 🔹 Signup
   const signup = async (username, email, password) => {
-    try {
-      const res = await fetch("http://localhost:5000/auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          username: username.trim(),
-          email: email.trim(),
-          password,
-        }),
-      });
+    const res = await fetch(`${API_URL}/auth/signup`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ username, email, password }),
+    });
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Signup failed");
-
-      setUser(data.user);
-      toast.success("Account created successfully!");
-    } catch (err) {
-      console.error("Signup error:", err);
-      throw err;
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.error);
     }
+    setUser(data.user);
   };
 
-  // Login
+  // 🔹 Login
   const login = async (email, password) => {
-    try {
-      const res = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email: email.trim(), password }),
-      });
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
+    console.log("res", res);
+    const data = await res.json();
 
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || "Login failed");
-
-      setUser(data.user);
-      toast.success("Logged in successfully!");
-    } catch (err) {
-      console.error("Login error:", err);
-      throw err;
+    if (!res.ok) {
+      throw new Error(data.error); // ✅ backend error preserved
     }
+
+    setUser(data.user);
   };
 
-  // Logout
+  // 🔹 Logout
   const logout = async () => {
-    try {
-      await fetch("http://localhost:5000/auth/logout", {
-        method: "POST",
-        credentials: "include",
-      });
-      toast.success("Logged out successfully!");
-    } catch (err) {
-      console.error("Logout failed:", err);
-      toast.error("Logout failed. Try again.");
-    } finally {
-      setUser(null);
-    }
+    await fetch(`${API_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    setUser(null);
   };
 
-  const value = useMemo(
-    () => ({ user, signup, login, logout, loading }),
-    [user, loading]
+  return (
+    <AuthContext.Provider value={{ user, signup, login, logout, loading }}>
+      {children}
+    </AuthContext.Provider>
   );
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

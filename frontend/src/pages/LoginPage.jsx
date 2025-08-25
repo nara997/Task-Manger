@@ -13,25 +13,13 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
-      const res = await fetch("http://localhost:5000/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Login failed");
-      }
-
-      setUser(data.user);
+      await login(email.trim(), password);
       navigate("/tasks");
-      toast.success("Login successful!");
     } catch (err) {
-      toast.error(err.message);
+      console.error("Login error:", err);
+      toast.error(err?.message || "Invalid credentials. Please try again.");
     } finally {
       setLoading(false);
     }

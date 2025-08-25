@@ -2,6 +2,7 @@ import React from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "react-hot-toast";
+import { API_URL } from "../config";
 
 const TaskCard = ({ task, setTasks }) => {
   const navigate = useNavigate();
@@ -13,13 +14,13 @@ const TaskCard = ({ task, setTasks }) => {
     try {
       if (!window.confirm("Are you sure you want to delete this task?")) return;
 
-      const res = await fetch(`http://localhost:5000/tasks/${id}`, {
+      const res = await fetch(`${API_URL}/tasks/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
 
       if (!res.ok) {
-        throw new Error(`Failed to delete task: ${res.status}`);
+        throw new Error(data.error || `Failed to delete task: ${res.status}`);
       }
 
       setTasks((prev) => prev.filter((t) => t._id !== id));
@@ -27,7 +28,7 @@ const TaskCard = ({ task, setTasks }) => {
       navigate("/");
     } catch (error) {
       console.error("Error deleting task:", error);
-      toast.error("Failed to delete task");
+      toast.error(error.message || "Failed to delete task");
     }
   };
 
@@ -36,7 +37,7 @@ const TaskCard = ({ task, setTasks }) => {
     const newStatus = !task.completed;
 
     try {
-      const res = await fetch(`http://localhost:5000/tasks/${id}/status`, {
+      const res = await fetch(`${API_URL}/tasks/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -96,11 +97,11 @@ const TaskCard = ({ task, setTasks }) => {
 
         {/* Actions */}
         <div className="flex gap-4">
-          <button className="text-gray-300 hover:text-gray-100 transition-colors">
-            <Link to={`/task/${task._id}`}>
+          <Link to={`/task/${task._id}`}>
+            <button className="text-gray-300 hover:text-gray-100 transition-colors">
               <Pencil size={18} />
-            </Link>
-          </button>
+            </button>
+          </Link>
           <button
             className="text-red-500 hover:text-red-700 transition-colors"
             onClick={(e) => handleDelete(e, task._id)}

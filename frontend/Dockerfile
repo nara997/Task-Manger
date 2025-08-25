@@ -13,7 +13,8 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Production image
+# Production image 
+# Stage 2: Serve
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 

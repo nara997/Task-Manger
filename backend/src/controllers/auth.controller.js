@@ -26,9 +26,18 @@ export const signup = asyncHandler(async (req, res) => {
         return res.status(400).json({ error: "Username, email & password required" });
     }
 
-    const exists = await User.findOne({ email });
-    if (exists) {
-        return res.status(409).json({ error: "Email already in use" });
+    // Check if email OR username already exists
+    const existingUser = await User.findOne({
+        $or: [{ email }, { username }],
+    });
+
+    if (existingUser) {
+        if (existingUser.email === email) {
+            return res.status(409).json({ error: "Email already in use" });
+        }
+        if (existingUser.username === username) {
+            return res.status(409).json({ error: "Username already taken" });
+        }
     }
 
     const user = await User.create({ username, email, password });

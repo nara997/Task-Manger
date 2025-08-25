@@ -2,8 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { ArrowLeftIcon, Trash2Icon } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { API_URL } from "../config";
 
-const API_URL = "http://localhost:5000";
+// src/config.js
 
 const TaskDetailPage = () => {
   const { id } = useParams();
@@ -39,6 +40,11 @@ const TaskDetailPage = () => {
 
   // Save updated task
   const handleSave = async () => {
+    if (!task.title.trim() || !task.description.trim()) {
+      toast.error("Title and content are required!");
+      console.log("Title and content are required!");
+      return;
+    }
     setSaving(true);
     try {
       const res = await fetch(`${API_URL}/tasks/${id}`, {
@@ -82,7 +88,13 @@ const TaskDetailPage = () => {
     }
   };
 
-  if (loading) return <p className="text-gray-400 p-6">Loading task...</p>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-neutral-950">
+        <p className="text-gray-400 animate-pulse">Loading task...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-950">

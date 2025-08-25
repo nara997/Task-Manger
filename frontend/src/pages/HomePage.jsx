@@ -3,8 +3,7 @@ import Navbar from "../components/Navbar";
 import TaskCard from "../components/TaskCard";
 import { toast } from "react-hot-toast";
 import TasksNotFound from "../components/TasksNotFound";
-
-const API_URL = "http://localhost:5000";
+import { API_URL } from "../config";
 
 const HomePage = () => {
   const [tasks, setTasks] = useState([]);
@@ -15,19 +14,17 @@ const HomePage = () => {
       try {
         const res = await fetch(`${API_URL}/tasks`, {
           method: "GET",
-          credentials: "include", // send cookie
+          credentials: "include",
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          setTasks(data);
-        } else {
-          const errorData = await res.json();
-          throw {
-            status: res.status,
-            message: errorData.message || "Failed to fetch tasks",
-          };
+        const data = await res.json();
+
+        if (!res.ok) {
+          // Throw a proper Error instance
+          throw new Error(data.error || "Failed to fetch tasks");
         }
+
+        setTasks(data);
       } catch (err) {
         console.error("Error fetching tasks:", err);
         toast.error(err.message || "Failed to load tasks");

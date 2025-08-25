@@ -2,8 +2,9 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ArrowLeftIcon } from "lucide-react";
 import { toast } from "react-hot-toast"; // ✅ import toast
+import { API_URL } from "../config";
 
-const API_URL = "http://localhost:5000"; // or use import.meta.env.VITE_API_URL
+// src/config.js
 
 const TaskCreationPage = () => {
   const [title, setTitle] = useState("");
