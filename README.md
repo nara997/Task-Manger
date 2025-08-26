@@ -1,106 +1,83 @@
-Task Manager – MERN Stack Application
+# Task Manager – MERN Stack Application
 
-A full-stack Task Manager application built with the MERN stack.
-Supports secure user authentication with JWT (HttpOnly cookies) and full CRUD for tasks.
+A full-stack Task Manager application built with the **MERN stack**.
+Supports **secure user authentication with JWT (HttpOnly cookies)** and full CRUD for tasks.
 
+---
 
-Tech Stack
+## 🔹 Tech Stack
 
-Frontend: React, Vite, React Router, TailwindCSS
+- **Frontend:** React, Vite, React Router, TailwindCSS
+- **Backend:** Node.js, Express.js, Mongoose (MongoDB)
+- **Authentication:** JWT stored in HttpOnly cookies
+- **Database:** MongoDB Atlas (cloud)
+- **Deployment-ready:** Docker Compose setup for running frontend + backend in containers (DB hosted on Atlas)
 
-Backend: Node.js, Express.js, Mongoose (MongoDB)
+---
 
-Authentication: JWT stored in HttpOnly cookies
+## 🔹 Features
 
-Database: MongoDB Atlas (cloud)
+### ✅ Authentication
+- Sign up with username, email, and password
+- Login with email + password
+- Secure JWT-based authentication (stored in HttpOnly cookies)
+- Session persistence → stays logged in across refresh using `/auth/me`
+- Logout → clears the session cookie
 
-Deployment-ready: Docker Compose setup for running frontend + backend in containers (DB hosted on Atlas)
+### ✅ Tasks
+- Create new task
+- View all tasks belonging to the logged-in user
+- Update task (title, description, status)
+- Delete task
 
+### ✅ Frontend
+- Built with React + Tailwind CSS
+- AuthContext for managing login state
+- Protected routes (only logged-in users can access tasks)
+- Modern UI with navbar + task cards
 
-Features
-✅ Authentication
+---
 
-Sign up with username, email, and password
+## 🔹 API Endpoints
 
-Login with email + password
+### Authentication
+- `POST /auth/signup` → Register new user
+- `POST /auth/login` → Login & set cookie
+- `GET /auth/me` → Get logged-in user info
+- `POST /auth/logout` → Clear cookie
 
-Secure JWT-based authentication (stored in HttpOnly cookies)
+### Tasks (Protected)
+- `GET /tasks` → Get all tasks for user
+- `POST /tasks` → Create new task
+- `PUT /tasks/:id` → Update task
+- `DELETE /tasks/:id` → Delete task
 
-Session persistence → stays logged in across refresh using /auth/me
+---
 
-Logout → clears the session cookie
+## 🔹 Authentication Flow
 
-✅ Tasks
+1. On signup/login, server issues a JWT stored in a secure HttpOnly cookie.
+2. Browser automatically attaches cookie on requests (`fetch(..., { credentials: "include" })`).
+3. `/auth/me` restores session on refresh.
+4. Logout clears the cookie.
 
-Create new task
+---
 
-View all tasks belonging to the logged-in user
+## 🔹 Testing with Postman
 
-Update task (title, description, status)
+- `POST /auth/signup` → Create account
+- `POST /auth/login` → Login (check Cookies tab for token)
+- `GET /auth/me` → Verify session
+- `POST /tasks` → Create a task
+- `GET /tasks` → List tasks
+- `PUT /tasks/:id` → Update task
+- `DELETE /tasks/:id` → Delete task
 
-Delete task
+---
 
-✅ Frontend
+## 🔹 Folder Structure
 
-Built with React + Tailwind CSS
-
-AuthContext for managing login state
-
-Protected routes (only logged-in users can access tasks)
-
-Modern UI with navbar + task cards
-
-
-API Endpoints
-Authentication
-
-POST /auth/signup → Register new user
-
-POST /auth/login → Login & set cookie
-
-GET /auth/me → Get logged-in user info
-
-POST /auth/logout → Clear cookie
-
-Tasks (Protected)
-
-GET /tasks → Get all tasks for user
-
-POST /tasks → Create new task
-
-PUT /tasks/:id → Update task
-
-DELETE /tasks/:id → Delete task
-
-🔹 Authentication Flow
-
-On signup/login, server issues a JWT stored in a secure HttpOnly cookie.
-
-Browser automatically attaches cookie on requests (fetch(..., { credentials: "include" })).
-
-/auth/me restores session on refresh.
-
-Logout clears the cookie.
-
-🔹 Testing with Postman
-
-POST /auth/signup → Create account
-
-POST /auth/login → Login (check Cookies tab for token)
-
-GET /auth/me → Verify session
-
-POST /tasks → Create a task
-
-GET /tasks → List tasks
-
-PUT /tasks/:id → Update task
-
-DELETE /tasks/:id → Delete task
-
-
-Folder Structure 
-
+```text
 task-manager/
 │
 ├── docker-compose.yml        # Orchestration file (runs frontend + backend + MongoDB together)
@@ -137,112 +114,109 @@ task-manager/
 │       ├── index.css         # Global styles (Tailwind, resets)
 │
 └── README.md                 # Project documentation
+```
 
+---
 
-⚡ Setup Instructions
-Option 1 – Run Locally (Manual)
-<details> <summary>Click to expand</summary>
-1. Clone Repository
+## ⚡ Setup Instructions
+
+### Option 1 – Run Locally (Manual)
+<details>
+<summary>Click to expand</summary>
+
+#### 1. Clone Repository
+```bash
 git clone https://github.com/your-username/task-manager.git
 cd task-manager
+```
 
-2. Backend Setup
+#### 2. Backend Setup
+```bash
 cd backend
 npm install
-
-
-Copy .env.example to .env and update values (MongoDB Atlas URI, JWT secret, etc.):
-
+```
+Copy `.env.example` to `.env` and update values (MongoDB Atlas URI, JWT secret, etc.):
+```bash
 cp .env.example .env
-
-
+```
 Start backend:
-
+```bash
 npm run dev
+```
 
-3. Frontend Setup
+#### 3. Frontend Setup
+```bash
 cd ../frontend
 npm install
-
-
-Copy .env.example to .env and update values (API URL):
-
+```
+Copy `.env.example` to `.env` and update values (API URL):
+```bash
 cp .env.example .env
-
-
+```
 Start frontend:
-
+```bash
 npm run dev
+```
 
-4. Access Application
-
-Frontend: http://localhost:5173
-
-Backend API: http://localhost:5000
+#### 4. Access Application
+- Frontend → http://localhost:5173
+- Backend API → http://localhost:5000
 
 </details>
-Option 2 – Run with Docker (Recommended 🚀)
-<details> <summary>Click to expand</summary>
-1. Requirements
 
-Docker
+---
 
-Docker Compose
+### Option 2 – Run with Docker (Recommended 🚀)
+<details>
+<summary>Click to expand</summary>
 
-2. Run Application
+#### 1. Requirements
+- Docker
+- Docker Compose
 
-From the project root, run:
-
+#### 2. Run Application
+```bash
 docker-compose up --build
-
-
+```
 This will:
+- Start Backend API (Node.js + Express)
+- Start Frontend (React + Vite)
+- Connect to MongoDB Atlas (via `.env` config)
 
-Start Backend API (Node.js + Express)
+#### 3. Access Application
+- Frontend → http://localhost:3000
+- Backend API → http://localhost:5000
 
-Start Frontend (React + Vite)
-
-Connect to MongoDB Atlas (via .env config)
-
-3. Access Application
-
-Frontend: http://localhost:3000
-
-Backend API: http://localhost:5000
-
-4. Stop Containers
+#### 4. Stop Containers
+```bash
 docker-compose down
+```
 
+</details>
 
+---
 
-Known Limitations
+## 🔹 Known Limitations
 
-No refresh tokens → session ends when JWT expires
+- No refresh tokens → session ends when JWT expires
+- Only a single user role (no admin vs user separation yet)
+- No pagination/filters → all tasks load at once
 
-Only a single user role (no admin vs user separation yet)
+---
 
-No pagination/filters → all tasks load at once
+## 🔹 Deliverables
 
+- GitHub repository with frontend/ and backend/ folders
+- Video walkthrough of the application
+- README with setup instructions, tech stack, and trade-offs
 
-Deliverables
+---
 
-GitHub repository with frontend/ and backend/ folders
+## 🔹 Future Improvements
 
-Video walkthrough of the application
-
-README with setup instructions, tech stack, and trade-offs
-
-
-Future Improvements
-
-(Not implemented yet, but considered for real-world use)
-
-Refresh tokens → for long-lived sessions and better security
-
-Pagination & filters → improve performance and user experience for large task lists
-
-File uploads → allow attachments (e.g., documents, images) per task
-
-Role-based access control (RBAC) → separate roles (admin vs user) with different permissions
-
-Modern loading indicators → replace basic loaders with spinners/skeleton screens for smoother UX during API calls
+*(Not implemented yet, but considered for real-world use)*
+- **Refresh tokens** → for long-lived sessions and better security
+- **Pagination & filters** → improve performance and user experience for large task lists
+- **File uploads** → allow attachments (e.g., documents, images) per task
+- **Role-based access control (RBAC)** → separate roles (admin vs user) with different permissions
+- **Modern loading indicators** → replace basic loaders with spinners/skeleton screens for smoother UX during API calls
