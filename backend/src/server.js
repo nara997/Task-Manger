@@ -3,7 +3,9 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
+import { connectDB } from "./config/db.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js"
+import { auth } from "./middleware/auth.js";
 
 
 import authRoutes from "./routes/auth.routes.js";
@@ -24,20 +26,21 @@ app.use("/auth", authRoutes);
 app.use("/tasks", taskRoutes);
 
 app.use(notFound);
+app.use(auth)
 
 app.use(errorHandler);
 
 // DB + Server
 const PORT = process.env.PORT || 5000;
 
-mongoose.set("strictQuery", true);
-mongoose.connect(process.env.MONGO_URI)
-    .then(() => {
-        console.log("✅ MongoDB connected");
-        app.listen(PORT, () => console.log(`🚀 Server running at http://localhost:${PORT}`));
-    })
-    .catch((err) => {
-        console.error("❌ DB connection failed", err);
-        process.exit(1);
-    });
+const start = async () => {
+  try {
+    await connectDB(process.env.MONGO_URI);
+    app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
+  } catch (e) {
+    console.error("Failed to start server:", e);
+    process.exit(1);
+  }
+};
 
+start();

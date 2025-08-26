@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 
 export const auth = (req, res, next) => {
     const token = req.cookies?.token;
-    if (!token) return res.status(401).json({ error: "Not authenticated" });
+    if (!token) return res.status(401).json({ error: "Authentication token missing. Please login to access this resource." });
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
